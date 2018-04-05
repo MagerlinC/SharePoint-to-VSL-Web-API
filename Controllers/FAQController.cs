@@ -6,49 +6,53 @@ using System.Net.Http;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Cors;
+using System.Threading.Tasks;
+using RambollProject.EFRepos;
 
 namespace RambollProject.Controllers
 {
         [EnableCors(origins: "*", headers: "*", methods: "*")]
         public class FAQController : ApiController
         {
-            private static readonly List<FAQDTO> faqs = new List<FAQDTO>{
-            new FAQDTO(0, "How long is a canvas?",
-                "A canvas is 27 meters long."),
-            new FAQDTO(1, "Why do the computers use Wondows 10?",
-                "The touch screen can register more touches with Windows 10."),
-            new FAQDTO(2, "Why can I not access the Span Wall software from my computer?",
-                "The Span Wall software only functions on your PC, if you use your PC's Chrome or Safari browser​.")
-
-        };
+            static EFFAQRepository _repo = new EFFAQRepository();
 
             [HttpGet]
-            public IHttpActionResult GetAllFAQs()
+            public async Task<IHttpActionResult> GetAllFAQs()
             {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                var faqs = await _repo.getAllFAQs();
+                if (faqs == null) return NotFound();
                 return Json(faqs);
             }
 
             [HttpGet]
-            public IHttpActionResult getFAQ(int id)
+            public async Task<IHttpActionResult> GetFAQ(int id)
             {
-                return Json(faqs[id]);
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                var faq = await _repo.getFAQ(id);
+                if (faq == null) return NotFound();
+                return Json(faq);
             }
 
-            public HttpResponseMessage Post()
+            [HttpPost]
+            public async Task<IHttpActionResult> PostFAQ([FromBody]FAQDTO faq)
             {
-                return new HttpResponseMessage()
-                {
-                    Content = new StringContent("POST: Test message")
-                };
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                var success = await _repo.postFAQ(faq);
+                if (!success) return BadRequest(ModelState);
+                // On succesful post, return posted item.
+                return Json(faq);
             }
 
-            public HttpResponseMessage Put()
+            [HttpDelete]
+            public async Task<IHttpActionResult> DeleteFAQ(int id)
             {
-                return new HttpResponseMessage()
-                {
-                    Content = new StringContent("PUT: Test message")
-                };
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                var success = await _repo.deleteFAQ(id);
+                if (!success) return BadRequest(ModelState);
+                // On succesful delete, return deleted id.
+                return Ok(id);
             }
-        }
+    }
     
 }
