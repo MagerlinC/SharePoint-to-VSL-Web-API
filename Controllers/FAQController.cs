@@ -8,10 +8,12 @@ using System.Web.Http;
 using System.Web.Http.Cors;
 using System.Threading.Tasks;
 using RambollProject.EFRepos;
+using PrototypeRingsted.Controllers;
 
 namespace RambollProject.Controllers
 {
-        [EnableCors(origins: "*", headers: "*", methods: "*")]
+        [AppAuthorize]
+        [EnableCors(origins: "http://localhost:4200", headers: "*", methods: "*")]
         public class FAQController : ApiController
         {
             static EFFAQRepository _repo = new EFFAQRepository();
